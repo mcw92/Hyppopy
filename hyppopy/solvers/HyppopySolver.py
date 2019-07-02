@@ -29,19 +29,33 @@ from hyppopy.globals import DEBUGLEVEL
 LOG = logging.getLogger(os.path.basename(__file__))
 LOG.setLevel(DEBUGLEVEL)
 
+"""
+abc - Abstract Base Classes
+Purpose: Define and use abstract base classes for interface verification.i
+Abstract classes are classes that contain one or more abstract methods. An abstract method is a method that is
+declared but contains no implementation. Abstract classes may not be instantiated and require subclasses to provide
+implementations for the abstract methods.
+Abstract base classes are a form of interface checking more strict than individual hasattr() checks for peculiar 
+methods. By defining an abstract base class, a common API can be established for a set of subclasses. This
+capability is especially useful in situations where someone less familiar with the source for an application is
+going to provide plug-in extensions.
+abc works by marking methods of the base class as abstract, and then registering concrete classes as implementations
+of the abstract base. If an application or library requires a particular API, issubclass() or isinstance() can be
+used to check an object against the abstract class. Use decorators to establish the public API for the class.
+"""
 
 class HyppopySolver(object):
     """
-    The HyppopySolver class is the base class for all solver addons. It defines virtual functions a child class has
-    to implement to deal with the front-end communication, orchestrating the optimization process and ensuring a proper
+    The HyppopySolver class is the base class for all solver add-ons. It defines virtual functions a child class has
+    to implement to deal with the front-end communication, orchestrate the optimization process and ensure proper
     process information storing.
     The key idea is that the HyppopySolver class defines an interface to configure and run an object instance of itself
-    independently from the concrete solver lib used to optimize in the background. To achieve this goal an addon
+    independently from the concrete solver lib used to optimize in the background. To achieve this goal an add-on
     developer needs to implement the abstract methods 'convert_searchspace', 'execute_solver' and 'loss_function_call'.
-    These methods abstract the peculiarities of the solver libs to offer, on the user side, a simple and consistent
-    parameter space configuration and optimization procedure. The method 'convert_searchspace' transforms the hyppopy
-    parameter space description into the solver lib specific description. The method loss_function_call is used to
-    handle solver lib specifics of calling the actual blackbox function and execute_solver is executed when the run
+    These methods abstract the peculiarities of the solver libs to offer and a simple and consistent parameter space 
+    configuration and optimization procedure on the user side. The method 'convert_searchspace' transforms the hyppopy
+    parameter space description into the solver-lib specific description. The method loss_function_call is used to
+    handle solver-lib specifics of calling the actual blackbox function and execute_solver is executed when the run
     method is invoked und takes care of calling the solver lib solving routine.
 
     The class HyppopySolver defines an interface to be implemented when writing a custom solver. Each solver derivative
@@ -74,17 +88,17 @@ class HyppopySolver(object):
         """
         self._idx = None                        # current iteration counter
         self._best = None                       # best parameter set
-        self._trials = None                     # trials object, hyppopy uses the Trials object from hyperopt
-        self._blackbox = None                   # blackbox function, eiter a  function or a BlackboxFunction instance
-        self._total_duration = None             # keeps track of the solvers running time
-        self._solver_overhead = None            # stores the time overhead of the solver, means total time minus time in blackbox
+        self._trials = None                     # trials object (hyppopy uses the Trials object from hyperopt)
+        self._blackbox = None                   # blackbox function (either a function or a BlackboxFunction instance)
+        self._total_duration = None             # keep track of the solver's running time
+        self._solver_overhead = None            # store time overhead of the solver, i.e. total time minus time in blackbox
         self._time_per_iteration = None         # mean time per iterration
-        self._accumulated_blackbox_time = None  # summed time the solver was in the blackbox function
+        self._accumulated_blackbox_time = None  # total time the solver was in the blackbox function
         self._visdom_viewer = None              # visdom viewer instance
 
-        self._child_members = {}                # this dict keeps track of the settings the child solver defines
-        self._hopt_signatures = {}              # this dict keeps track of the hyperparameter signatures the child solver defines
-        self.define_interface()                 # the child define interface function is called which defines settings and hyperparameter signatures
+        self._child_members = {}                # dict keeping track of settings defined by child solver
+        self._hopt_signatures = {}              # dict keeping track of hyperparameter signatures defined by child solver
+        self.define_interface()                 # child define interface function is called to define settings and hyperparameter signatures
 
         if project is not None:
             self.project = project
@@ -92,25 +106,25 @@ class HyppopySolver(object):
     @abc.abstractmethod
     def convert_searchspace(self, hyperparameter):
         """
-        This function gets the unified hyppopy-like parameterspace description as input and, if necessary, should
-        convert it into a solver lib specific format. The function is invoked when run is called and what it returns
-        is passed as searchspace argument to the function execute_solver.
+        This function gets the unified hyppopy-like parameterspace description as input and, if necessary, converts it
+        into a solver-lib specific format. The function is invoked when run is called and what it returns is passed as 
+        searchspace argument to the function execute_solver.
 
         :param hyperparameter: [dict] nested parameter description dict e.g. {'name': {'domain':'uniform', 'data':[0,1], 'type':'float'}, ...}
 
         :return: [object] converted hyperparameter space
         """
-        raise NotImplementedError('users must define convert_searchspace to use this class')
+        raise NotImplementedError('Users must define convert_searchspace to use this class.')
 
     @abc.abstractmethod
     def execute_solver(self, searchspace):
         """
-        This function is called immediately after convert_searchspace and get the output of the latter as input. It's
-        purpose is to call the solver libs main optimization function.
+        This function is called immediately after convert_searchspace and uses the output of the latter as input. Its
+        purpose is to call the solver lib's main optimization function.
 
         :param searchspace: converted hyperparameter space
         """
-        raise NotImplementedError('users must define execute_solver to use this class')
+        raise NotImplementedError('Users must define execute_solver to use this class.')
 
     @abc.abstractmethod
     def loss_function_call(self, params):
@@ -124,18 +138,18 @@ class HyppopySolver(object):
 
         :return: [float] loss
         """
-        raise NotImplementedError('users must define loss_function_call to use this class')
+        raise NotImplementedError('Users must define loss_function_call to use this class.')
 
     @abc.abstractmethod
     def define_interface(self):
         """
         This function is called when HyppopySolver.__init__ function finished. Child classes need to define their
-        individual parameter here by calling the _add_member function for each class member variable need to be defined.
-        Using _add_hyperparameter_signature the structure of a hyperparameter the solver expects must be defined.
-        Both, members and hyperparameter signatures are later get checked, before executing the solver, ensuring
-        settings passed fullfill solver needs.
+        individual parameters here by calling the _add_member function for each class member variable to be defined.
+        Using _add_hyperparameter_signature, the structure of a hyperparameter expected by the solver must be defined.
+        Both members and hyperparameter signatures are checked later on, before executing the solver, to ensure the
+        settings passed fulfill the solver's needs.
         """
-        raise NotImplementedError('users must define define_interface to use this class')
+        raise NotImplementedError('Users must define define_interface to use this class.')
 
     def _add_member(self, name, dtype, value=None, default=None):
         """
@@ -147,11 +161,11 @@ class HyppopySolver(object):
         :param value: [object] option value
         :param default: [object] option default value
         """
-        assert isinstance(name, str), "precondition violation, name needs to be of type str, got {}".format(type(name))
+        assert isinstance(name, str), "Precondition violation, name needs to be of type str, got {}.".format(type(name))
         if value is not None:
-            assert isinstance(value, dtype), "precondition violation, value does not match dtype condition!"
+            assert isinstance(value, dtype), "Precondition violation, value does not match dtype condition!"
         if default is not None:
-            assert isinstance(default, dtype), "precondition violation, default does not match dtype condition!"
+            assert isinstance(default, dtype), "Precondition violation, default does not match dtype condition!"
         setattr(self, name, value)
         self._child_members[name] = {"type": dtype, "value": value, "default": default}
 
@@ -165,13 +179,13 @@ class HyppopySolver(object):
         :param dtype: [type] hyperparameter data type
         :param options: [list] list of possible values the hp can be set, if None no option check is done
         """
-        assert isinstance(name, str), "precondition violation, name needs to be of type str, got {}".format(type(name))
+        assert isinstance(name, str), "Precondition violation, name needs to be of type str, got {}.".format(type(name))
         self._hopt_signatures[name] = {"type": dtype, "options": options}
 
     def _check_project(self):
         """
         The function checks the members and hyperparameter signatures read from the project instance to be consistent
-        with the members and signatures defined in the child class via define_interface.
+            with the members and signatures defined in the child class via define_interface.
         """
         assert isinstance(self.project, HyppopyProject), "Invalid project instance, either not set or setting failed!"
 
@@ -196,14 +210,14 @@ class HyppopySolver(object):
         # check child members
         for name in self._child_members.keys():
             if name not in self.project.__dict__.keys():
-                msg = "missing settings field {}!".format(name)
+                msg = "Missing settings field {}!".format(name)
                 LOG.error(msg)
                 raise LookupError(msg)
             self.__dict__[name] = self.project.settings[name]
 
     def __compute_time_statistics(self):
         """
-        Evaluates all timestatistic values available
+        Evaluates all time statistic values available
         """
         dts = []
         for trial in self._trials.trials:
@@ -220,7 +234,7 @@ class HyppopySolver(object):
         This function is called each iteration with a selected parameter set. The parameter set selection is driven by
         the solver lib itself. The purpose of this function is to take care of the iteration reporting and the calling
         of the callback_func is available. As a developer you might want to overwrite this function completely (e.g.
-        HyperoptSolver) but then you need to take care for iteration reporting for yourself. The alternative is to only
+        HyperoptSolver) but then you need to take care of iteration reporting by yourself. The alternative is to only
         implement loss_function_call (e.g. OptunitySolver).
 
         :param params: [dict] hyperparameter space sample e.g. {'p1': 0.123, 'p2': 3.87, ...}
@@ -304,11 +318,12 @@ class HyppopySolver(object):
 
     def get_results(self):
         """
-        This function returns a complete optimization history as pandas DataFrame and a dict with the optimal parameter set.
+        This function returns a complete optimization history as pandas DataFrame (data manipulation and analysis) and 
+        a dict with the optimal parameter set.
 
         :return: [DataFrame], [dict] history and optimal parameter set
         """
-        assert isinstance(self.trials, Trials), "precondition violation, wrong trials type! Maybe solver was not yet executed?"
+        assert isinstance(self.trials, Trials), "Precondition violation, wrong trials type! Maybe solver was not yet executed?"
         results = {'duration': [], 'losses': [], 'status': []}
         pset = self.trials.trials[0]['misc']['vals']
         for p in pset.keys():
