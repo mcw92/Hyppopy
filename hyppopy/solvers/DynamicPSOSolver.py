@@ -23,16 +23,14 @@ from hyppopy.solvers.HyppopySolver import HyppopySolver
 from . import OptunitySolver
 
 class DynamicPSOSolver(OptunitySolver):
-
-    def __init__(self, project=None):
-        """
-        The OptunitySolver constructor accepts a HyppopyProject.
-
-        :param project: [HyppopyProject] project instance, default=None
-        """
-        super().__init__(self,project)
-        #HyppopySolver.__init__(self, project)
-
+    """
+    Dynamic PSO HypopPy Solver Class
+    """
+    """
+    The DynamicPSOSolver class definition does not need an .__init__() because it inherits from OptunitySolver and
+    .__init__() does not really do anything differently for DynamicPSOSolver than it already does for OptunitySolver.
+    This is why one can skip defining it and the .__init__() of the superclass will be called automatically.
+    """
     def define_interface(self):
         """
         This function is called when HyppopySolver.__init__ function finished. Child classes need to define their
@@ -72,21 +70,24 @@ class DynamicPSOSolver(OptunitySolver):
         """
         LOG.debug("execute_solver using solution space:\n\n\t{}\n".format(pformat(searchspace)))
         try:
-            self.best, _, _ = optunity.minimize_structured(f=self.loss_function,
-                                                           num_evals=self.max_iterations,
-                                                           search_space=searchspace)
+            tree = optunity.search_spaces.SearchTree(searchspace)   # Set up tree structure to model search space.
+            box = tree.to_box()                                     # Create set of box constraints to define given search space.
+            f = optunity.functions.logged(self.loss_function)       # Call log here because function signature used later on is internal logic.
+            f = tree.wrap_decoder(f)               # Wrap decoder and constraints for internal search space rep.
+            f = optunity.constrainst.wrap_constraints(f, default=sys.float_info.max, range_oo=box)
             """
-            In Optunity api.py: optunity.minimze_structured(f,search_space,num_evals=50,pmap=map)
-            Basic function minimization routine minimizing f within given box constraints.
-            
-            :param f: function to be minimized
-            :param search_space: search space
-            :param num_evals: number of permitted function evaluations
-            :param pmap: callable map function to use
-            
-            :return: retrieved minimum, extra info, solver info
-            
-            This function will implicitly choose an appropriate solver based on "num_evals" and box constraints.
+            'wrap_constraints' decorates function f with given input domain constraints. default [float] gives a 
+            function value to default to in case of constraint violations. range_oo [dict] gives open range 
+            constraints lb and lu, i.e. lb < x < ub and range = (lb, ub), respectively.
+            """
+            solver = optunity.make_solver('dynamic particle swarm')
+            self.best, _ = optunity.optimize(solver=solver,
+                                             func=f,
+                                             maximize=False,
+                                             max_evals=self.max_iterations,
+                                             pmap=map,
+                                             decoder=tree.decode)
+            """
             Set up tree structure to model search space.
             Create set of box constraints to define given search space.
             Suggest solver to use (default: PSO).
