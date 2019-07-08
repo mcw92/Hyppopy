@@ -24,21 +24,22 @@ from hyppopy.solvers.HyppopySolver import HyppopySolver
 
 class OptunitySolver(HyppopySolver):
 
-    def __init__(self, project=None):
-        """
-        The constructor accepts a HyppopyProject.
-
-        :param project: [HyppopyProject] project instance, default=None
-        """
-        HyppopySolver.__init__(self, project)
+# Unmodified constructor from HyppopySolver class can be used here. No need to define __init__ again!
+#    def __init__(self, project=None):
+#        """
+#        The constructor accepts a HyppopyProject.
+#
+#        :param project: [HyppopyProject] project instance, default=None
+#        """
+#        HyppopySolver.__init__(self, project)
 
     def define_interface(self):
         """
         This function is called when HyppopySolver.__init__ function finished. Child classes need to define their
-        individual parameter here by calling the _add_member function for each class member variable need to be defined.
+        individual parameters here by calling the _add_member function for each class member variable to be defined.
         Using _add_hyperparameter_signature the structure of a hyperparameter the solver expects must be defined.
-        Both, members and hyperparameter signatures are later get checked, before executing the solver, ensuring
-        settings passed fullfill solver needs.
+        Both members and hyperparameter signatures are checked later on, before executing the solver, ensuring
+        settings passed fulfil solver needs.
         """
         self._add_member("max_iterations", int)
         self._add_hyperparameter_signature(name="domain", dtype=str,
@@ -64,8 +65,8 @@ class OptunitySolver(HyppopySolver):
 
     def execute_solver(self, searchspace):
         """
-        This function is called immediately after convert_searchspace and get the output of the latter as input. It's
-        purpose is to call the solver libs main optimization function.
+        This function is called immediately after convert_searchspace and takes the output of the latter as input. Its
+        purpose is to call the solver lib's main optimization function.
 
         :param searchspace: converted hyperparameter space
         """
