@@ -10,6 +10,13 @@
 #
 # See LICENSE
 
+"""
+*********
+* TO DO *
+*********
+# define_interface(self): What is the right dtype for function handles? How to pass functions/set functions as member functions?
+"""
+
 import os
 import logging
 import optunity
@@ -33,6 +40,20 @@ class DynamicPSOSolver(OptunitySolver):
     The functions 'define_interface', 'loss_function_call', 'split_categorical' and 'convert_space' are not defined
     here as they are inherited from the parent class OptunitySolver without any changes.
     """
+
+    def define_interface(self):
+        """
+        Function called after instantiation to define individual parameters for child solver class by calling
+        _add_member function for each class member variable to be defined. When designing your own solver class,
+        you need to implement this method to define custom solver options that are automatically converted
+        to class attributes.
+        """
+        super().define_interface()
+        self._add_member("adapt_params", object)    # Pass function used to adapt parameters during dynamic PSO as specified by user.
+        self._add_member("eval_obj", object)        # Pass function indicating how to combine objective function arguments and parameters to obtain value.
+
+    # ? What is the right dtype for a function?
+
 
     def execute_solver(self, searchspace):
         """
