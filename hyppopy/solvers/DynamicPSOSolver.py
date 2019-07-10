@@ -14,7 +14,7 @@
 *********
 * TO DO *
 *********
-# define_interface(self): What is the right dtype for function handles? How to pass functions/set functions as member functions?
+# define_interface(self): How to get names of functions passed by the user?
 """
 
 import os
@@ -37,7 +37,7 @@ class DynamicPSOSolver(OptunitySolver):
     The DynamicPSOSolver class definition does not need an .__init__() because it inherits from OptunitySolver and
     .__init__() does not really do anything differently for DynamicPSOSolver than it already does for OptunitySolver.
     This is why one can skip defining it and the .__init__() of the superclass will be called automatically.
-    The functions 'define_interface', 'loss_function_call', 'split_categorical' and 'convert_space' are not defined
+    The functions 'loss_function_call', 'split_categorical' and 'convert_space' are not defined
     here as they are inherited from the parent class OptunitySolver without any changes.
     """
 
@@ -49,11 +49,19 @@ class DynamicPSOSolver(OptunitySolver):
         to class attributes.
         """
         super().define_interface()
-        self._add_member("adapt_params", object)    # Pass function used to adapt parameters during dynamic PSO as specified by user.
-        self._add_member("eval_obj", object)        # Pass function indicating how to combine objective function arguments and parameters to obtain value.
+        self._add_member(adapt_params)          # Pass function used to adapt parameters during dynamic PSO as specified by user.
+        self._add_member_function(eval_obj)     # Pass function indicating how to combine objective function arguments and parameters to obtain value.
 
-    # ? What is the right dtype for a function?
+    def _add_member_function(self, func):
+        """
+        When designing your child solver class you need to implement the define_interface abstract method where you can
+        call _add_member_function to define custom solver options being Python callables which are automatically 
+        converted to class methods.
 
+        :param func: [callable] function to be passed to solver
+        """
+        assert callable(func), "Precondition violation, passed object is not callable!"
+        setattr(self, func.__name__, func)
 
     def execute_solver(self, searchspace):
         """
