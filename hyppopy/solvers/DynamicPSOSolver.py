@@ -15,6 +15,7 @@
 * TO DO *
 *********
 # define_interface(self): How to get names of functions passed by the user?
+# Check _add_method function with Markus/Oskar.
 """
 
 import os
@@ -49,10 +50,10 @@ class DynamicPSOSolver(OptunitySolver):
         to class attributes.
         """
         super().define_interface()
-        self._add_member(adapt_params)          # Pass function used to adapt parameters during dynamic PSO as specified by user.
-        self._add_member_function(eval_obj)     # Pass function indicating how to combine objective function arguments and parameters to obtain value.
+        self._add_method(adapt_params) # Pass function used to adapt parameters during dynamic PSO as specified by user.
+        self._add_method(eval_obj)     # Pass function indicating how to combine objective function arguments and parameters to obtain value.
 
-    def _add_member_function(self, func):
+    def _add_method(self, func):
         """
         When designing your child solver class you need to implement the define_interface abstract method where you can
         call _add_member_function to define custom solver options being Python callables which are automatically 
@@ -62,6 +63,7 @@ class DynamicPSOSolver(OptunitySolver):
         """
         assert callable(func), "Precondition violation, passed object is not callable!"
         setattr(self, func.__name__, func)
+        self._child_members[func.__name__] = {"type": func.__class__, "value": None, "default": None}
 
     def execute_solver(self, searchspace):
         """
