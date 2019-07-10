@@ -59,7 +59,7 @@ class DynamicPSOSolver(OptunitySolver):
         call _add_member_function to define custom solver options being Python callables which are automatically 
         converted to class methods.
 
-        :param func: [callable] function to be passed to solver
+        :param func: [callable] function object to be passed to solver
         """
         assert callable(func), "Precondition violation, passed object is not callable!"
         setattr(self, func.__name__, func)
