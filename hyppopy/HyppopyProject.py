@@ -23,16 +23,16 @@ LOG.setLevel(DEBUGLEVEL)
 
 class HyppopyProject(object):
     """
-    The HyppopyProject class takes care of the optimization settings. An instance can be configured using a config
-    dictionary or by using the hyperparameter and settings methods. In case of initializing via dicts those can be
-    passed to the constructor or by using the set_config method. After initialization a HyppopyProject instance is
-    passed to a solver class which internally checks for consistency with it's needs. The class distinguished
-    between two categories, hyperparameter and general settings.
+    The HyppopyProject class takes care of the optimization settings. An instance can be configured with a config
+    dictionary or by using the hyperparameter and settings methods. The dict can be passed to the constructor or 
+    by using the set_config method. After initialization, a HyppopyProject instance is passed to a solver class 
+    which internally checks for consistency with its needs. 
+    The class distinguishes between two categories, hyperparameter and general settings.
 
-    The hyperparameter are a dictionary structure as follows and can be accessed via hyperparameter
-    {'param_name: {'domain': 'uniform', ...}, ...}
+    Hyperparameters have a dict structure as follows and can be accessed via hyperparameter
+    {'param_name: {'domain': 'uniform', ...}, ...}.
 
-    General settings are internally converted to class attributes and can accessed directly or via settings
+    General settings are internally converted to class attributes and can be accessed directly or via settings.
 
     An example config could look like:
     config = {'hyperparameter': {'myparam': {'domain': 'uniform', 'data': [0, 100], 'type': float}, ...},
@@ -59,12 +59,12 @@ class HyppopyProject(object):
 
     def __parse_members(self):
         """
-        The function converts settings into class attributes
+        Convert settings into class attributes.
         """
-        for name, value in self.settings.items():
-            if name not in self.__dict__.keys():
-                setattr(self, name, value)
-            else:
+        for name, value in self.settings.items():   # Loop over settings given as name=value pairs in dict.
+            if name not in self.__dict__.keys():    # Convert setting to class attributes, if it does not exist yet.
+                setattr(self, name, value)          # __dict__ gives the namespace
+            else:                                   # If corresponding attribute exists, set it to given value.
                 self.__dict__[name] = value
 
     def set_config(self, config):
@@ -73,7 +73,7 @@ class HyppopyProject(object):
 
         :param config: [dict] configuration dict defining hyperparameter and general settings
         """
-        assert isinstance(config, dict), "precondition violation, config needs to be of type dict, got {}".format(type(config))
+        assert isinstance(config, dict), "Precondition violation, config needs to be of type dict, got {}.".format(type(config))
         confic_cp = copy.deepcopy(config)
         if HYPERPARAMETERPATH in confic_cp.keys():
             self._data[HYPERPARAMETERPATH] = confic_cp[HYPERPARAMETERPATH]
@@ -83,29 +83,27 @@ class HyppopyProject(object):
 
     def set_hyperparameter(self, params):
         """
-        This function can be used to set the hyperparameter description directly by passing the hyperparameter section
-        of a config dict (see class description). Alternatively use add_hyperparameter to add one after each other.
+        Set hyperparameter description directly by passing the hyperparameter section of a config dict (see class description). 
+        Alternatively, use add_hyperparameter to add one after the other.
 
         :param params: [dict] configuration dict defining hyperparameter
         """
-        assert isinstance(params, dict), "precondition violation, params needs to be of type dict, got {}".format(type(params))
+        assert isinstance(params, dict), "Precondition violation, params needs to be of type dict, got {}.".format(type(params))
         self._data[HYPERPARAMETERPATH] = params
 
     def add_hyperparameter(self, name, **kwargs):
         """
-        This function can be used to set hyperparameter descriptions. Alternatively use set_hyperparameter to set all at
-        once.
+        Set hyperparameter descriptions. Alternatively use set_hyperparameter to set all at once.
 
         :param name: [str] hyperparameter name
         :param kwargs: [dict] configuration dict defining a hyperparameter e.g. domain='uniform', data=[1,100], ...
         """
-        assert isinstance(name, str), "precondition violation, name needs to be of type str, got {}".format(type(name))
+        assert isinstance(name, str), "Precondition violation, name needs to be of type str, got {}.".format(type(name))
         self._data[HYPERPARAMETERPATH][name] = kwargs
 
     def set_settings(self, **kwargs):
         """
-        This function can be used to set the general settings directly by passing the settings as name=value pairs.
-        Alternatively use add_setting to add one after each other.
+        Set general settings directly by passing them as name=value pairs. Alternatively, use add_setting to add one after the  other.
 
         :param kwargs: [dict] settings dict e.g. my_setting_1=3.1415, my_setting_2='hello world', ...
         """
