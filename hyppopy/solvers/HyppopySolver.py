@@ -100,8 +100,8 @@ class HyppopySolver(object):
         self._hopt_signatures = {}              # dict keeping track of hyperparameter signatures defined by child solver
         self.define_interface()                 # child define interface function is called to define settings and hyperparameter signatures
 
-        if project is not None:
-            self.project = project
+        if project is not None:                 # Hyppopyproject is set as solver attribute 'project'.
+            self.project = project              # 'project' attribute makes functions defined by user at top-level interface accessible.
 
     @abc.abstractmethod
     def convert_searchspace(self, hyperparameter):
