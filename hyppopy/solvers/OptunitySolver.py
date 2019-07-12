@@ -25,6 +25,13 @@ from hyppopy.solvers.HyppopySolver import HyppopySolver
 class OptunitySolver(HyppopySolver):
 
 # Unmodified constructor from HyppopySolver class can be used here. No need to define __init__ again!
+    
+    def __init__(self, project=None):
+        """
+        The constructor accepts a HyppopyProject.
+        :param project: [HyppopyProject] project instance, default=None
+        """
+        HyppopySolver.__init__(self, project)
 
     def define_interface(self):
         """
