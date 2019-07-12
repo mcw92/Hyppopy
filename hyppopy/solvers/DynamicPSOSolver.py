@@ -28,7 +28,7 @@ LOG = logging.getLogger(os.path.basename(__file__))
 LOG.setLevel(DEBUGLEVEL)
 
 from hyppopy.solvers.HyppopySolver import HyppopySolver
-from . import OptunitySolver
+from .OptunitySolver import OptunitySolver
 
 class DynamicPSOSolver(OptunitySolver):
     """
@@ -41,7 +41,7 @@ class DynamicPSOSolver(OptunitySolver):
     The functions 'loss_function_call', 'split_categorical' and 'convert_space' are not defined
     here as they are inherited from the parent class OptunitySolver without any changes.
     """
-
+    
     def define_interface(self):
         """
         Function called after instantiation to define individual parameters for child solver class by calling
@@ -50,20 +50,24 @@ class DynamicPSOSolver(OptunitySolver):
         to class attributes.
         """
         super().define_interface()
-        self._add_method(adapt_params) # Pass function used to adapt parameters during dynamic PSO as specified by user.
-        self._add_method(eval_obj)     # Pass function indicating how to combine objective function arguments and parameters to obtain value.
+        self._add_method("update_param")           # Pass function used to adapt parameters during dynamic PSO as specified by user.
+        self._add_method("combine_obj")      # Pass function indicating how to combine objective function arguments and parameters to obtain value.
 
-    def _add_method(self, func):
+    def _add_method(self, name, func=None, default=None):
         """
         When designing your child solver class you need to implement the define_interface abstract method where you can
-        call _add_member_function to define custom solver options being Python callables which are automatically 
+        call _add_member_function to define custom solver options, here of Python callable type, which are automatically 
         converted to class methods.
 
         :param func: [callable] function object to be passed to solver
         """
-        assert callable(func), "Precondition violation, passed object is not callable!"
-        setattr(self, func.__name__, func)
-        self._child_members[func.__name__] = {"type": func.__class__, "value": None, "default": None}
+        assert isinstance(name, str), "Precondition violation, name needs to be of tyoe str, got {}.".format(type(name))
+        if func is not None:
+            assert callable(func), "Precondition violation, passed object is not callable!"
+        if default is not None:
+            assert callable(default), "Precondition violation, passed object is not callable!"
+        setattr(self, name, func)
+        self._child_members[name] = {"type": "callable", "function": func, "default": default}
 
     def execute_solver(self, searchspace):
         """
