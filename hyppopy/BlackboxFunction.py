@@ -36,20 +36,20 @@ def default_kwargs(**defaultKwargs):
 
 class BlackboxFunction(object):
     """
-    This class is a BlackboxFunction wrapper class encapsulating the loss function. Additional function pointer can be
-    set to get access at different pipelining steps:
+    BlackboxFunction wrapper class encapsulating the loss function. Additional function pointers can be set to get access at 
+    different pipelining steps:
 
-    - dataloader_func: data loading, the function must return a data object and is called first when the solver is executed.
-                       The data object returned will be the input of the blackbox function.
-    - preprocess_func: data preprocessing is called after dataloader_func, the functions signature must be foo(data, params)
-                       and must return a data object. The input is the data object set directly or via dataloader_func,
+    - dataloader_func: The data loading function must return a data object and is called first upon solver execution.
+                       The data object returned serves as input of the blackbox function.
+    - preprocess_func: The data preprocessing function is called after data loading. Its signature must be foo(data, params)
+                       and it must return a data object. The input is the data object set directly or via dataloader_func,
                        the params are passed from constructor params.
-    - callback_func: this function is called at each iteration step getting passed the trail info content, can be used for
-                     custom visualization
-    - data: add a data object directly
+    - callback_func: The callback function is called at each iteration step passing the trail info content, can be used for
+                     custom visualization.
+    - data: Add a data object directly.
 
     The constructor accepts several function pointers or a data object which are all None by default (see below).
-    Additionally one can define an arbitrary number of arg pairs. These are passed as input to each function pointer as
+    Additionally, one can define an arbitrary number of arg pairs. These are passed as input to each function pointer as
     arguments.
 
     :param dataloader_func: data loading function pointer, default=None
@@ -81,7 +81,7 @@ class BlackboxFunction(object):
 
     def setup(self, kwargs):
         """
-        Alternative to Constructor, kwargs signature see __init__
+        Alternative to constructor, kwargs signature see __init__
 
         :param kwargs: (see __init__)
         """
@@ -100,7 +100,7 @@ class BlackboxFunction(object):
         if self.dataloader_func is not None:
             self._raw_data = self.dataloader_func(params=params)
         assert self._raw_data is not None, "Missing data exception!"
-        assert self.blackbox_func is not None, "Missing blackbox fucntion exception!"
+        assert self.blackbox_func is not None, "Missing blackbox function exception!"
         if self.preprocess_func is not None:
             result = self.preprocess_func(data=self._raw_data, params=params)
             if result is not None:
