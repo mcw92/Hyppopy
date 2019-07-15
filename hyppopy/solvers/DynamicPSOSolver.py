@@ -50,7 +50,7 @@ class DynamicPSOSolver(OptunitySolver):
         to class attributes.
         """
         super().define_interface()
-        self._add_method("update_param")           # Pass function used to adapt parameters during dynamic PSO as specified by user.
+        self._add_method("update_param")     # Pass function used to adapt parameters during dynamic PSO as specified by user.
         self._add_method("combine_obj")      # Pass function indicating how to combine objective function arguments and parameters to obtain value.
 
     def _add_method(self, name, func=None, default=None):
@@ -89,12 +89,15 @@ class DynamicPSOSolver(OptunitySolver):
             constraints lb and lu, i.e. lb < x < ub and range = (lb, ub), respectively.
             """
             solver = optunity.make_solver('dynamic particle swarm') # Create solver from given parameters.
-            self.best, _ = optunity.optimize(solver=solver,
+            self.best, _ = optunity.optimize_dyn_PSO(solver=solver,
                                              func=f,
                                              maximize=False,
                                              max_evals=self.max_iterations,
                                              pmap=map,
-                                             decoder=tree.decode)
+                                             decoder=tree.decode,
+                                             update_param=self.update_param,
+                                             eval_obj=self.combine_obj   
+                                             )
             """
             Use 'optimize' function for respective solver requested:
             optimize(solver,f,maximize=False,max_evals=num_evals,pmap=pmap,decoder=tree.decode)
@@ -105,6 +108,10 @@ class DynamicPSOSolver(OptunitySolver):
             :param maximize: [bool] maximize or minimize
             :param max_evals: [int] maximum number of permitted function evaluations
             :param pmap: [function] map() function to use
+            :param update_param: [function] function to update parameters of objective function
+                                 based on current state of knowledge
+            :param eval_obj: [function] function giving functional form of objective function, i.e.
+                             how to combine parameters and terms to obtain scalar fitness/loss.
             
             :return: solution, named tuple with further details
             optimize function (api.py) internally uses 'optimize' function from requested solver module.
