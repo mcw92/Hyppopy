@@ -61,7 +61,7 @@ class DynamicPSOSolver(OptunitySolver):
 
         :param func: [callable] function object to be passed to solver
         """
-        assert isinstance(name, str), "Precondition violation, name needs to be of tyoe str, got {}.".format(type(name))
+        assert isinstance(name, str), "Precondition violation, name needs to be of type str, got {}.".format(type(name))
         if func is not None:
             assert callable(func), "Precondition violation, passed object is not callable!"
         if default is not None:
@@ -72,7 +72,7 @@ class DynamicPSOSolver(OptunitySolver):
     def execute_solver(self, searchspace):
         """
         This function is called immediately after convert_searchspace and uses the output of the latter as input. Its
-        purpose is to call the solver libs main optimization function.
+        purpose is to call the solver lib's main optimization function.
 
         :param searchspace: converted hyperparameter space
         """
@@ -82,28 +82,23 @@ class DynamicPSOSolver(OptunitySolver):
             box = tree.to_box()                                     # Create set of box constraints to define given search space.
             f = optunity.functions.logged(self.loss_function)       # Call log here because function signature used later on is internal logic.
             f = tree.wrap_decoder(f)                                # Wrap decoder and constraints for internal search space rep.
-            f = optunity.constrainst.wrap_constraints(f, default=sys.float_info.max, range_oo=box)
+            f = optunity.constraints.wrap_constraints(f, default=sys.float_info.max, range_oo=box)
             """
             'wrap_constraints' decorates function f with given input domain constraints. default [float] gives a 
             function value to default to in case of constraint violations. range_oo [dict] gives open range 
             constraints lb and lu, i.e. lb < x < ub and range = (lb, ub), respectively.
             """
-            solver = optunity.make_solver('dynamic particle swarm') # Create solver from given parameters.
-            self.best, _ = optunity.optimize_dyn_PSO(solver=solver,
-                                             func=f,
-                                             maximize=False,
-                                             max_evals=self.max_iterations,
-                                             pmap=map,
-                                             decoder=tree.decode,
-                                             update_param=self.update_param,
-                                             eval_obj=self.combine_obj   
-                                             )
+            self.best, _ = optunity.optimize_dyn_PSO(func=f,
+                                                     maximize=False,
+                                                     max_evals=self.max_iterations,
+                                                     pmap=map,
+                                                     decoder=tree.decode,
+                                                     update_param=self.update_param,
+                                                     eval_obj=self.combine_obj   
+                                                    )
             """
-            Use 'optimize' function for respective solver requested:
-            optimize(solver,f,maximize=False,max_evals=num_evals,pmap=pmap,decoder=tree.decode)
-            In general: optimize(solver,func,maximize=True,max_evals=0,pmap=map,decoder=None)
-            Optimize func with given solver.
-            :param solver: solver to be used, e.g. result from :func: optunity.make_solver
+            optimize_dyn_PSO(func, maximize=False, max_evals=0, pmap=map, decoder=None, update_param=None, eval_obj=None)
+            Optimize func with dynamic PSO solver.
             :param func: [callable] objective function
             :param maximize: [bool] maximize or minimize
             :param max_evals: [int] maximum number of permitted function evaluations
@@ -114,8 +109,8 @@ class DynamicPSOSolver(OptunitySolver):
                              how to combine parameters and terms to obtain scalar fitness/loss.
             
             :return: solution, named tuple with further details
-            optimize function (api.py) internally uses 'optimize' function from requested solver module.
+            optimize_dyn_PSO function (api.py) internally uses 'optimize' function from dynamic PSO solver module.
             """
         except Exception as e:
-            LOG.error("internal error in optunity.minimize_structured occured. {}".format(e))
-            raise BrokenPipeError("internal error in optunity.minimize_structured occured. {}".format(e))
+            LOG.error("Internal error in optunity.optimize_dyn_PSO occured. {}".format(e))
+            raise BrokenPipeError("Internal error in optunity.optimize_dyn_PSO occured. {}".format(e))
