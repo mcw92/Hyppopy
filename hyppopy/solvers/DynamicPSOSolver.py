@@ -19,6 +19,7 @@
 """
 
 import os
+import sys
 import logging
 import optunity
 from pprint import pformat
@@ -88,6 +89,9 @@ class DynamicPSOSolver(OptunitySolver):
             function value to default to in case of constraint violations. range_oo [dict] gives open range 
             constraints lb and lu, i.e. lb < x < ub and range = (lb, ub), respectively.
             """
+            solver = optunity.make_solver("particle swarm")
+            print("Normal PSO solver yay.")
+            solver_dyn = optunity.make_solver("dynamic particle swarm")
             self.best, _ = optunity.optimize_dyn_PSO(func=f,
                                                      maximize=False,
                                                      max_evals=self.max_iterations,
