@@ -51,8 +51,10 @@ class DynamicPSOSolver(OptunitySolver):
         to class attributes.
         """
         super().define_interface()
-        self._add_method("update_param")     # Pass function used to adapt parameters during dynamic PSO as specified by user.
-        self._add_method("combine_obj")      # Pass function indicating how to combine objective function arguments and parameters to obtain value.
+        self._add_method("update_param")        # Pass function used to adapt parameters during dynamic PSO as specified by user.
+        self._add_method("combine_obj")         # Pass function indicating how to combine obj. func. arguments and parameters to obtain scalar value.
+        self._add_member("num_args_obj", int)    # Pass number of arguments/terms contributing to obj. func.
+        self._add_member("num_params_obj", int)  # Pass number of parameters of obj. func.
 
     def _add_method(self, name, func=None, default=None):
         """
@@ -89,12 +91,11 @@ class DynamicPSOSolver(OptunitySolver):
             function value to default to in case of constraint violations. range_oo [dict] gives open range 
             constraints lb and lu, i.e. lb < x < ub and range = (lb, ub), respectively.
             """
-            solver = optunity.make_solver("particle swarm")
-            print("Normal PSO solver yay.")
-            solver_dyn = optunity.make_solver("dynamic particle swarm")
             self.best, _ = optunity.optimize_dyn_PSO(func=f,
                                                      maximize=False,
                                                      max_evals=self.max_iterations,
+                                                     num_args_obj=self.num_args_obj,
+                                                     num_params_obj=self.num_params_obj,
                                                      pmap=map,
                                                      decoder=tree.decode,
                                                      update_param=self.update_param,
