@@ -91,7 +91,10 @@ class DynamicPSOSolver(OptunitySolver):
             function value to default to in case of constraint violations. range_oo [dict] gives open range 
             constraints lb and lu, i.e. lb < x < ub and range = (lb, ub), respectively.
             """
+            #suggestion = optunity.suggest_solver(num_evals=self.max_iterations, solver_name="dynamic particle swarm", **box)
+            #solver = optunity.make_solver(**suggestion)
             self.best, _ = optunity.optimize_dyn_PSO(func=f,
+                                                     box=box,
                                                      maximize=False,
                                                      max_evals=self.max_iterations,
                                                      num_args_obj=self.num_args_obj,
@@ -99,8 +102,8 @@ class DynamicPSOSolver(OptunitySolver):
                                                      pmap=map,
                                                      decoder=tree.decode,
                                                      update_param=self.update_param,
-                                                     eval_obj=self.combine_obj   
-                                                    )
+                                                     eval_obj=self.combine_obj,   
+                                                     )
             """
             optimize_dyn_PSO(func, maximize=False, max_evals=0, pmap=map, decoder=None, update_param=None, eval_obj=None)
             Optimize func with dynamic PSO solver.
