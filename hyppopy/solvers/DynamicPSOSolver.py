@@ -20,6 +20,7 @@
 
 import os
 import sys
+import numpy
 import logging
 import optunity
 from pprint import pformat
@@ -80,19 +81,16 @@ class DynamicPSOSolver(OptunitySolver):
         :param searchspace: converted hyperparameter space
         """
         LOG.debug("execute_solver using solution space:\n\n\t{}\n".format(pformat(searchspace)))
+        tree = optunity.search_spaces.SearchTree(searchspace)   # Set up tree structure to model search space.
+        box = tree.to_box()                                     # Create set of box constraints to define given search space.
+        f = optunity.functions.logged(self.loss_function)       # Call log here because function signature used later on is internal logic.
+        f = tree.wrap_decoder(f)                                # Wrap decoder and constraints for internal search space rep.
+        f = optunity.constraints.wrap_constraints(f, default=sys.float_info.max*numpy.ones(self.num_args_obj), range_oo=box)
+        # 'wrap_constraints' decorates function f with given input domain constraints. default [float] gives a 
+        # function value to default to in case of constraint violations. range_oo [dict] gives open range 
+        # constraints lb and lu, i.e. lb < x < ub and range = (lb, ub), respectively.
+
         try:
-            tree = optunity.search_spaces.SearchTree(searchspace)   # Set up tree structure to model search space.
-            box = tree.to_box()                                     # Create set of box constraints to define given search space.
-            f = optunity.functions.logged(self.loss_function)       # Call log here because function signature used later on is internal logic.
-            f = tree.wrap_decoder(f)                                # Wrap decoder and constraints for internal search space rep.
-            f = optunity.constraints.wrap_constraints(f, default=sys.float_info.max, range_oo=box)
-            """
-            'wrap_constraints' decorates function f with given input domain constraints. default [float] gives a 
-            function value to default to in case of constraint violations. range_oo [dict] gives open range 
-            constraints lb and lu, i.e. lb < x < ub and range = (lb, ub), respectively.
-            """
-            #suggestion = optunity.suggest_solver(num_evals=self.max_iterations, solver_name="dynamic particle swarm", **box)
-            #solver = optunity.make_solver(**suggestion)
             self.best, _ = optunity.optimize_dyn_PSO(func=f,
                                                      box=box,
                                                      maximize=False,
