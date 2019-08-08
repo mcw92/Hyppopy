@@ -21,10 +21,12 @@
 import os
 import sys
 import numpy
+import datetime
 import logging
 import optunity
 from pprint import pformat
 from hyppopy.globals import DEBUGLEVEL
+from hyperopt import Trials
 
 LOG = logging.getLogger(os.path.basename(__file__))
 LOG.setLevel(DEBUGLEVEL)
@@ -56,6 +58,7 @@ class DynamicPSOSolver(OptunitySolver):
         self._add_method("combine_obj")         # Pass function indicating how to combine obj. func. arguments and parameters to obtain scalar value.
         self._add_member("num_args_obj", int)    # Pass number of arguments/terms contributing to obj. func.
         self._add_member("num_params_obj", int)  # Pass number of parameters of obj. func.
+        self._add_hyperparameter_signature(name="domain", dtype=str, options=["uniform", "loguniform", "categorical"])
 
     def _add_method(self, name, func=None, default=None):
         """
@@ -73,7 +76,53 @@ class DynamicPSOSolver(OptunitySolver):
         setattr(self, name, func)
         self._child_members[name] = {"type": "callable", "function": func, "default": default}
 
-    def execute_solver(self, searchspace):
+    def convert_searchspace(self, hyperparameter):
+        """
+        Get unified hyppopy-like parameter space description as input and, if necessary,
+        convert it into a solver-lib specific format. The function is invoked when run is called and what it returns
+        is passed as searchspace argument to the function execute_solver.
+
+        :param hyperparameter: [dict] nested parameter description dict e.g. {'name': {'domain':'uniform', 'data':[0,1], 'type':float}, ...}
+
+        :return: [object] converted hyperparameter space
+        :return: [dict] dict keeping domains for different hyperparameters.
+        """
+        LOG.debug("convert input parameter\n\n\t{}\n".format(pformat(hyperparameter)))
+        # Split input in categorical and non-categorical data.
+        cat, uni = self.split_categorical(hyperparameter)
+        # Build up dict keeping all non-categorical data.
+        uniforms = {}
+        domains = {}
+        for key, value in uni.items():
+            for key2, value2 in value.items():
+                if key2 == "data":
+                    if len(value2) == 3:
+                        uniforms[key] = value2[0:2]
+                    elif len(value2) == 2:
+                        uniforms[key] = value2
+                    else:
+                        raise AssertionError("precondition violation, optunity searchspace needs list with left and right range bounds!")
+                if key2 == "domain":
+                    domains[key] = value2
+
+        if len(cat) == 0:
+            return uniforms, domains
+        # Build nested categorical structure.
+        inner_level = uniforms
+        for key, value in cat.items():
+            tmp = {}
+            optunity_space = {}
+            for key2, value2 in value.items():
+                if key2 == "data":
+                    for elem in value2:
+                        tmp[elem] = inner_level
+                if key2 == "domain":
+                    domains[key] = value2
+            optunity_space[key] = tmp
+            inner_level = optunity_space
+        return optunity_space, domains
+
+    def execute_solver(self, searchspace, domains):
         """
         This function is called immediately after convert_searchspace and uses the output of the latter as input. Its
         purpose is to call the solver lib's main optimization function.
@@ -93,6 +142,7 @@ class DynamicPSOSolver(OptunitySolver):
         try:
             self.best, _ = optunity.optimize_dyn_PSO(func=f,
                                                      box=box,
+                                                     domains=domains,
                                                      maximize=False,
                                                      max_evals=self.max_iterations,
                                                      num_args_obj=self.num_args_obj,
@@ -120,3 +170,37 @@ class DynamicPSOSolver(OptunitySolver):
         except Exception as e:
             LOG.error("Internal error in optunity.optimize_dyn_PSO occured. {}".format(e))
             raise BrokenPipeError("Internal error in optunity.optimize_dyn_PSO occured. {}".format(e))
+
+    def run(self, print_stats=True):
+        """
+        This function starts the optimization process.
+        :param print_stats: [bool] en- or disable console output
+        """
+        self._idx = 0
+        self.trials = Trials()
+
+        start_time = datetime.datetime.now()
+        try:
+            search_space, domains = self.convert_searchspace(self.project.hyperparameter)
+        except Exception as e:
+            msg = "Failed to convert searchspace, error: {}".format(e)
+            LOG.error(msg)
+            raise AssertionError(msg)
+        try:
+            self.execute_solver(search_space, domains)
+        except Exception as e:
+            msg = "Failed to execute solver, error: {}".format(e)
+            LOG.error(msg)
+            raise AssertionError(msg)
+        end_time = datetime.datetime.now()
+        dt = end_time - start_time
+        days = divmod(dt.total_seconds(), 86400)
+        hours = divmod(days[1], 3600)
+        minutes = divmod(hours[1], 60)
+        seconds = divmod(minutes[1], 1)
+        milliseconds = divmod(seconds[1], 0.001)
+        self._total_duration = [int(days[0]), int(hours[0]), int(minutes[0]), int(seconds[0]), int(milliseconds[0])]
+        if print_stats:
+            self.print_best()
+            self.print_timestats()
+
