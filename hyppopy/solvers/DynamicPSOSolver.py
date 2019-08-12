@@ -10,14 +10,6 @@
 #
 # See LICENSE
 
-"""
-*********
-* TO DO *
-*********
-# define_interface(self): How to get names of functions passed by the user?
-# Check _add_method function with Markus/Oskar.
-"""
-
 import os
 import sys
 import numpy
@@ -35,16 +27,7 @@ from hyppopy.solvers.HyppopySolver import HyppopySolver
 from .OptunitySolver import OptunitySolver
 
 class DynamicPSOSolver(OptunitySolver):
-    """
-    Dynamic PSO HyppoPy Solver Class
-    """
-    """
-    The DynamicPSOSolver class definition does not need an .__init__() because it inherits from OptunitySolver and
-    .__init__() does not really do anything differently for DynamicPSOSolver than it already does for OptunitySolver.
-    This is why one can skip defining it and the .__init__() of the superclass will be called automatically.
-    The functions 'loss_function_call', 'split_categorical' and 'convert_space' are not defined
-    here as they are inherited from the parent class OptunitySolver without any changes.
-    """
+    """Dynamic PSO HyppoPy Solver Class"""
     
     def define_interface(self):
         """
@@ -147,7 +130,7 @@ class DynamicPSOSolver(OptunitySolver):
                                                      max_evals=self.max_iterations,
                                                      num_args_obj=self.num_args_obj,
                                                      num_params_obj=self.num_params_obj,
-                                                     pmap=map,
+                                                     pmap=map,#optunity.pmap,
                                                      decoder=tree.decode,
                                                      update_param=self.update_param,
                                                      eval_obj=self.combine_obj,   
