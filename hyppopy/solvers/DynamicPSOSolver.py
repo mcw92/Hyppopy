@@ -130,7 +130,7 @@ class DynamicPSOSolver(OptunitySolver):
                                                      max_evals=self.max_iterations,
                                                      num_args_obj=self.num_args_obj,
                                                      num_params_obj=self.num_params_obj,
-                                                     pmap=map,#optunity.pmap,
+                                                     pmap=optunity.pmap,
                                                      decoder=tree.decode,
                                                      update_param=self.update_param,
                                                      eval_obj=self.combine_obj,   
