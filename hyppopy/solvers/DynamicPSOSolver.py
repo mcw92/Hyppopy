@@ -154,6 +154,24 @@ class DynamicPSOSolver(OptunitySolver):
             LOG.error("Internal error in optunity.optimize_dyn_PSO occured. {}".format(e))
             raise BrokenPipeError("Internal error in optunity.optimize_dyn_PSO occured. {}".format(e))
 
+    def print_best(self):
+        """
+        Optimization result console output printing.
+        """
+        print("\n")
+        print("#" * 40)
+        print("###       Best Parameter Choice      ###")
+        print("#" * 40)
+        for name, value in self.best.items():
+            print(" - {}\t:\t{}".format(name, value))
+        #print("\n - number of iterations\t:\t{}".format(self.trials.trials[-1]['tid']+1))
+        #print(" - total time\t:\t{}d:{}h:{}m:{}s:{}ms".format(self._total_duration[0],
+        #                                                      self._total_duration[1],
+        #                                                      self._total_duration[2],
+        #                                                      self._total_duration[3],
+        #                                                      self._total_duration[4]))
+        print("#" * 40)
+
     def run(self, print_stats=True):
         """
         This function starts the optimization process.
@@ -183,7 +201,7 @@ class DynamicPSOSolver(OptunitySolver):
         seconds = divmod(minutes[1], 1)
         milliseconds = divmod(seconds[1], 0.001)
         self._total_duration = [int(days[0]), int(hours[0]), int(minutes[0]), int(seconds[0]), int(milliseconds[0])]
+        self.print_best()
         if print_stats:
-            self.print_best()
             self.print_timestats()
 
