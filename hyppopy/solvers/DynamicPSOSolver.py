@@ -36,12 +36,16 @@ class DynamicPSOSolver(OptunitySolver):
         you need to implement this method to define custom solver options that are automatically converted
         to class attributes.
         """
-        super().define_interface()
-        self._add_method("update_param")        # Pass function used to adapt parameters during dynamic PSO as specified by user.
-        self._add_method("combine_obj")         # Pass function indicating how to combine obj. func. arguments and parameters to obtain scalar value.
-        self._add_member("num_args_obj", int)    # Pass number of arguments/terms contributing to obj. func.
-        self._add_member("num_params_obj", int)  # Pass number of parameters of obj. func.
+        self._add_member("num_particles", int)          # Pass local number of particles.
+        self._add_member("num_generations", int)        # Pass number of generations, i.e. iterations per particle.
+        self._add_member("num_args_obj", int)           # Pass number of args/terms contributing to obj. func.
+        self._add_member("num_params_obj", int)         # Pass number of params of obj. func.
+        self._add_member("num_particles_global", int)   # Pass global number of particles.
+        self._add_method("update_param")                # Pass function to adapt params during dynamic PSO.
+        self._add_method("combine_obj")                 # Pass function combining obj. func. args and params to scalar value.
         self._add_hyperparameter_signature(name="domain", dtype=str, options=["uniform", "loguniform", "categorical"])
+        self._add_hyperparameter_signature(name="data", dtype=list)
+        self._add_hyperparameter_signature(name="type", dtype=type)
 
     def _add_method(self, name, func=None, default=None):
         """
@@ -127,7 +131,9 @@ class DynamicPSOSolver(OptunitySolver):
                                                      box=box,
                                                      domains=domains,
                                                      maximize=False,
-                                                     max_evals=self.max_iterations,
+                                                     num_particles=self.num_particles,
+                                                     num_generations=self.num_generations,
+                                                     num_particles_global=self.num_particles_global,
                                                      num_args_obj=self.num_args_obj,
                                                      num_params_obj=self.num_params_obj,
                                                      pmap=map,#optunity.pmap,
