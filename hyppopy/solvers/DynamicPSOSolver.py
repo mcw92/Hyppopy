@@ -16,6 +16,7 @@ import numpy
 import datetime
 import logging
 import optunity
+from mpi4py import MPI
 from pprint import pformat
 from hyppopy.globals import DEBUGLEVEL
 from hyperopt import Trials
@@ -36,13 +37,14 @@ class DynamicPSOSolver(OptunitySolver):
         you need to implement this method to define custom solver options that are automatically converted
         to class attributes.
         """
-        self._add_member("num_particles", int)          # Pass local number of particles.
-        self._add_member("num_generations", int)        # Pass number of generations, i.e. iterations per particle.
-        self._add_member("num_args_obj", int)           # Pass number of args/terms contributing to obj. func.
-        self._add_member("num_params_obj", int)         # Pass number of params of obj. func.
-        self._add_member("num_particles_global", int)   # Pass global number of particles.
-        self._add_method("update_param")                # Pass function to adapt params during dynamic PSO.
-        self._add_method("combine_obj")                 # Pass function combining obj. func. args and params to scalar value.
+        self._add_member("num_particles", int)                              # Pass local number of particles.
+        self._add_member("num_generations", int)                            # Pass number of generations, i.e. iterations per particle.
+        self._add_member("num_args_obj", int)                               # Pass number of args/terms contributing to obj. func.
+        self._add_member("num_params_obj", int)                             # Pass number of params of obj. func.
+        self._add_member("num_particles_global", int)                       # Pass global number of particles.
+        self._add_member("communicator", MPI.Comm, default=MPI.COMM_WORLD)  # Pass communicator.
+        self._add_method("update_param")                                    # Pass function to adapt params during dynamic PSO.
+        self._add_method("combine_obj")                                     # Pass function combining obj. func. args and params to scalar value.
         self._add_hyperparameter_signature(name="domain", dtype=str, options=["uniform", "loguniform", "categorical"])
         self._add_hyperparameter_signature(name="data", dtype=list)
         self._add_hyperparameter_signature(name="type", dtype=type)
@@ -136,7 +138,8 @@ class DynamicPSOSolver(OptunitySolver):
                                                      num_particles_global=self.num_particles_global,
                                                      num_args_obj=self.num_args_obj,
                                                      num_params_obj=self.num_params_obj,
-                                                     pmap=map,#optunity.pmap,
+                                                     pmap=map,
+                                                     comm=self.communicator,
                                                      decoder=tree.decode,
                                                      update_param=self.update_param,
                                                      eval_obj=self.combine_obj,   
