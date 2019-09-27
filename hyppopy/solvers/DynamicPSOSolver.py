@@ -42,7 +42,8 @@ class DynamicPSOSolver(OptunitySolver):
         self._add_member("num_args_obj", int)                               # Pass number of args/terms contributing to obj. func.
         self._add_member("num_params_obj", int)                             # Pass number of params of obj. func.
         self._add_member("num_particles_global", int)                       # Pass global number of particles.
-        self._add_member("communicator", MPI.Comm, default=MPI.COMM_WORLD)  # Pass communicator.
+        self._add_member("inter_comm", MPI.Comm, default=MPI.COMM_WORLD)    # Pass inter-block communicator.
+        self._add_member("intra_comm", MPI.Comm, default=MPI.COMM_WORLD)    # Pass intra-block communicator.
         self._add_method("update_param")                                    # Pass function to adapt params during dynamic PSO.
         self._add_method("combine_obj")                                     # Pass function combining obj. func. args and params to scalar value.
         self._add_hyperparameter_signature(name="domain", dtype=str, options=["uniform", "loguniform", "categorical"])
@@ -139,7 +140,8 @@ class DynamicPSOSolver(OptunitySolver):
                                                      num_args_obj=self.num_args_obj,
                                                      num_params_obj=self.num_params_obj,
                                                      pmap=map,
-                                                     comm=self.communicator,
+                                                     comm_inter=self.inter_comm,
+                                                     comm_intra=self.intra_comm
                                                      decoder=tree.decode,
                                                      update_param=self.update_param,
                                                      eval_obj=self.combine_obj,   
