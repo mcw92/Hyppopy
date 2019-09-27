@@ -18,6 +18,7 @@ import types
 import datetime
 import numpy as np
 import pandas as pd
+from mpi4py import MPI
 from hyperopt import Trials
 from hyppopy.globals import *
 from hyppopy.VisdomViewer import VisdomViewer
