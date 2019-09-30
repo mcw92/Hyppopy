@@ -212,7 +212,7 @@ class DynamicPSOSolver(OptunitySolver):
         seconds = divmod(minutes[1], 1)
         milliseconds = divmod(seconds[1], 0.001)
         self._total_duration = [int(days[0]), int(hours[0]), int(minutes[0]), int(seconds[0]), int(milliseconds[0])]
-        self.print_best()
-        if print_stats:
-            self.print_timestats()
+        if MPI.COMM_WORLD.Get_rank() ==0: self.print_best()
+        if print_stats and MPI.COMM_WORLD.Get_rank()==0:
+                self.print_timestats()
 
