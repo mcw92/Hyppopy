@@ -22,8 +22,7 @@ LOG.setLevel(DEBUGLEVEL)
 
 
 class HyppopyProject(object):
-    """
-    The HyppopyProject class takes care of the optimization settings. An instance can be configured with a config
+    """The HyppopyProject class takes care of the optimization settings. An instance can be configured with a config
     dictionary or by using the hyperparameter and settings methods. The dict can be passed to the constructor or 
     by using the set_config method. After initialization, a HyppopyProject instance is passed to a solver class 
     which internally checks for consistency with its needs. 
@@ -48,9 +47,7 @@ class HyppopyProject(object):
     """
 
     def __init__(self, config=None):
-        """
-        Constructor
-
+        """Constructor
         :param config: [dict] config dictionary of the form {'hyperparameter': {...}, ...}
         """
         self._data = {HYPERPARAMETERPATH: {}, SETTINGSPATH: {}}
@@ -58,9 +55,7 @@ class HyppopyProject(object):
             self.set_config(config)
 
     def __parse_members(self):
-        """
-        Convert settings into class attributes.
-        """
+        """Convert settings into class attributes."""
         for name, value in self.settings.items():   # Loop over settings given as name=value pairs in dict.
             if name not in self.__dict__.keys():    # Convert setting to class attributes, if it does not exist yet.
                 setattr(self, name, value)          # __dict__ gives the namespace
@@ -68,9 +63,7 @@ class HyppopyProject(object):
                 self.__dict__[name] = value
 
     def set_config(self, config):
-        """
-        Set a config dict
-
+        """Set a config dict
         :param config: [dict] configuration dict defining hyperparameter and general settings
         """
         assert isinstance(config, dict), "Precondition violation, config needs to be of type dict, got {}.".format(type(config))
@@ -82,19 +75,15 @@ class HyppopyProject(object):
         self.__parse_members()
 
     def set_hyperparameter(self, params):
-        """
-        Set hyperparameter description directly by passing the hyperparameter section of a config dict (see class description). 
+        """Set hyperparameter description directly by passing the hyperparameter section of a config dict (see class description). 
         Alternatively, use add_hyperparameter to add one after the other.
-
         :param params: [dict] configuration dict defining hyperparameter
         """
         assert isinstance(params, dict), "Precondition violation, params needs to be of type dict, got {}.".format(type(params))
         self._data[HYPERPARAMETERPATH] = params
 
     def add_hyperparameter(self, name, **kwargs):
-        """
-        Set hyperparameter descriptions. Alternatively use set_hyperparameter to set all at once.
-
+        """Set hyperparameter descriptions. Alternatively use set_hyperparameter to set all at once.
         :param name: [str] hyperparameter name
         :param kwargs: [dict] configuration dict defining a hyperparameter e.g. domain='uniform', data=[1,100], ...
         """
@@ -102,18 +91,14 @@ class HyppopyProject(object):
         self._data[HYPERPARAMETERPATH][name] = kwargs
 
     def set_settings(self, **kwargs):
-        """
-        Set general settings directly by passing them as name=value pairs. Alternatively, use add_setting to add one after the  other.
-
+        """Set general settings directly by passing them as name=value pairs. Alternatively, use add_setting to add one after the  other.
         :param kwargs: [dict] settings dict e.g. my_setting_1=3.1415, my_setting_2='hello world', ...
         """
         self._data[SETTINGSPATH] = kwargs
         self.__parse_members()
 
     def add_setting(self, name, value):
-        """
-        This function can be used to set a general settings. Alternatively use set_settings to set all at once.
-
+        """This function can be used to set a general settings. Alternatively use set_settings to set all at once.
         :param name: [str] setting name
         :param value: [object] settings value
         """
@@ -122,9 +107,7 @@ class HyppopyProject(object):
         self.__parse_members()
 
     def get_typeof(self, name):
-        """
-        Returns a hyperparameter type by name
-
+        """Returns a hyperparameter type by name
         :param name: [str] hyperparameter name
         :return: [type] hyperparameter type
         """
