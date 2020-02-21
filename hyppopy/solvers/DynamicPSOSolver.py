@@ -44,6 +44,8 @@ class DynamicPSOSolver(OptunitySolver):
         self._add_member("num_particles_global", int)                       # Pass global number of particles.
         self._add_member("comm_inter", MPI.Comm, default=MPI.COMM_WORLD)    # Pass inter-block communicator.
         self._add_member("comm_intra", MPI.Comm, default=MPI.COMM_WORLD)    # Pass intra-block communicator.
+        self._add_member("phi1", float, default=1.5)                        # Pass acceleration coefficient phi1 of pbest.
+        self._add_member("phi2", float, default=2.0)                        # Pass acceleration coefficient phi2 of gbest.
         self._add_method("update_param")                                    # Pass function to adapt params during dynamic PSO.
         self._add_method("combine_obj")                                     # Pass function combining obj. func. args and params to scalar value.
         self._add_hyperparameter_signature(name="domain", dtype=str, options=["uniform", "loguniform", "categorical"])
@@ -139,6 +141,8 @@ class DynamicPSOSolver(OptunitySolver):
                                                      num_particles_global=self.num_particles_global,
                                                      num_args_obj=self.num_args_obj,
                                                      num_params_obj=self.num_params_obj,
+                                                     phi1=self.phi1,
+                                                     phi2=self.phi2,
                                                      pmap=map,
                                                      comm_inter=self.comm_inter,
                                                      comm_intra=self.comm_intra,
