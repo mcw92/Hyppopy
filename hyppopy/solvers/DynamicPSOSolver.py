@@ -47,6 +47,7 @@ class DynamicPSOSolver(OptunitySolver):
         self._add_member("comm_intra", MPI.Comm, default=MPI.COMM_WORLD)    # Pass intra-block communicator.
         self._add_member("phi1", float, default=1.5)                        # Pass acceleration coefficient phi1 of pbest.
         self._add_member("phi2", float, default=2.0)                        # Pass acceleration coefficient phi2 of gbest.
+        self._add_member("seed", int)                                       # Pass random number generator seed for reproducibilty.
         self._add_member("workspace", str, default=str(pathlib.Path.home()))# Pass path to workspace.
         self._add_method("update_param")                                    # Pass function to adapt params during dynamic PSO.
         self._add_method("combine_obj")                                     # Pass function combining obj. func. args and params to scalar value.
@@ -151,7 +152,8 @@ class DynamicPSOSolver(OptunitySolver):
                                                      workspace=self.workspace,
                                                      decoder=tree.decode,
                                                      update_param=self.update_param,
-                                                     eval_obj=self.combine_obj,   
+                                                     eval_obj=self.combine_obj,
+                                                     seed = self.seed
                                                      )
             """
             optimize_dyn_PSO(func, maximize=False, max_evals=0, pmap=map, decoder=None, update_param=None, eval_obj=None)
