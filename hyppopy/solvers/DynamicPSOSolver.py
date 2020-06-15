@@ -37,10 +37,12 @@ class DynamicPSOSolver(OptunitySolver):
         to class attributes.
         """
         super().define_interface()
-        self._add_method("update_param")        # Pass function used to adapt parameters during dynamic PSO as specified by user.
-        self._add_method("combine_obj")         # Pass function indicating how to combine obj. func. arguments and parameters to obtain scalar value.
-        self._add_member("num_args_obj", int)    # Pass number of arguments/terms contributing to obj. func.
-        self._add_member("num_params_obj", int)  # Pass number of parameters of obj. func.
+        self._add_method("update_param")                # Pass function used to adapt parameters during dynamic PSO as specified by user.
+        self._add_method("combine_obj")                 # Pass function indicating how to combine obj. func. arguments and parameters to obtain scalar value.
+        self._add_member("num_args_obj", int)           # Pass number of arguments/terms contributing to obj. func.
+        self._add_member("num_params_obj", int)         # Pass number of parameters of obj. func.
+        self._add_member("phi1", float, default=1.5)    # Pass first PSO acceleration coefficient.
+        self._add_member("phi2", float, default=2.0)    # Pass second PSO acceleration coefficient.
         self._add_hyperparameter_signature(name="domain", dtype=str, options=["uniform", "loguniform", "categorical"])
 
     def _add_method(self, name, func=None, default=None):
@@ -134,6 +136,8 @@ class DynamicPSOSolver(OptunitySolver):
                                                      decoder=tree.decode,
                                                      update_param=self.update_param,
                                                      eval_obj=self.combine_obj,   
+                                                     phi1=self.phi1,
+                                                     phi2=self.phi2
                                                      )
             """
             optimize_dyn_PSO(func, maximize=False, max_evals=0, pmap=map, decoder=None, update_param=None, eval_obj=None)
