@@ -8,44 +8,44 @@
 
 ## What is Hyppopy?
 
-Hyppopy is a python toolbox for blackbox optimization. It's purpose is to offer a unified and easy to use interface to a collection of solver libraries. Currently provided solvers are:
+Hyppopy is a python toolbox for blackbox optimization. Its purpose is to offer a unified and easy-to-use interface to a collection of solver libraries. Currently provided solvers are:
 
 * [Hyperopt](http://hyperopt.github.io/hyperopt/)
 * [Optunity](https://optunity.readthedocs.io/en/latest/user/index.html)
 * [Optuna](https://optuna.org/)
-* Quasi-Randomsearch Solver
-* Randomsearch Solver
-* Gridsearch Solver
+* quasi-random-search Solver
+* random-search solver
+* grid-search solver
 
 [See a solver analysis here: https://github.com/MIC-DKFZ/Hyppopy/blob/master/examples/solver_comparison/HyppopyReport.pdf]
 
 ## Installation
 
-1. clone the [Hyppopy](http:\\github.com) project from Github
-2. (create a virtual environment), open a console (with your activated virtual env) and go to the hyppopy root folder
+1. Clone the [Hyppopy](http:\\github.com) project from Github
+2. (Create a virtual environment), open a console (with your activated virtual env) and go to the hyppopy root folder
 3. ```$ pip install -r requirements.txt```
 4. ```$ python setup.py install``` (for normal usage) or ```$ python setup.py develop``` (if you want to join the hyppopy development *hooray*)
 
 
 ## How to use Hyppopy?
 
-#### The Hyperparamaterspace
+#### The hyperparamater space
 
-Hyppopy defines a common hyperparameterspace description, whatever solver is used. A hyperparameter description includes the following fields:
+Hyppopy defines a common hyperparameter-space description, whatever solver is used. A hyperparameter description includes the following fields:
 
 * domain: the domain defines how the solver samples the parameter space, options are:
-	* uniform: samples the data range [a,b] evenly, whereas b>a
-	* normal: samples the data range [a,b] using a normal distribution with mu=a+(b-a)/2, sigma=(b-a)/6, whereas b>a
-	* loguniform: samples the data range [a,b] logarithmic using e^x by sampling the exponent range x=[log(a), log(b)] uniformly, whereas a>0 and b>a
+	* uniform: samples the data range [a,b] evenly, where b>a
+	* normal: samples the data range [a,b] using a normal distribution with mu=a+(b-a)/2, sigma=(b-a)/6, where b>a
+	* loguniform: samples the data range [a,b] logarithmic using e^x by sampling the exponent range x=[log(a), log(b)] uniformly, where a>0 and b>a
 	* categorical: is used to define a data list
-* data: in case of categorical domain data is a list, all other domains expect a range [a, b]
-* type: the parameter data type as string 'int', 'float' or 'str'
+* data: in case of categorical domain, data is a list, all other domains expect a range [a, b]
+* type: the parameter data type as string, i.e., 'int', 'float', or 'str'
 
-An exeption must be kept in mind when using the GridsearchSolver. The gridsearch additionally needs a number of samples per domain, which must be set using the field: frequency.
+An exception must be kept in mind when using the grid-searchS slver. The grid search additionally needs a number of samples per domain, which must be set using the field: frequency.
 
 #### The HyppopyProject class
 
-The HyppopyProject class takes care all settings necessary for the solver and your workflow. To setup a HyppopyProject instance we can use a nested dictionary or the classes memberfunctions respectively.
+The HyppopyProject class takes care all settings necessary for the solver and your workflow. To setup a HyppopyProject instance we can use a nested dictionary or the classes' member functions, respectively.
 
 ```python
 # Import the HyppopyProject class
@@ -103,7 +103,7 @@ project = HyppopyProject(config=config)
 print("max_iterations:", project.max_iterations)
 print("anything_you_want:", project.anything_you_want)
 
-#alternatively
+# Alternatively: 
 project = HyppopyProject()
 project.set_settings(max_iterations=500, anything_you_want=42)
 print("anything_you_want:", project.anything_you_want)
@@ -118,7 +118,7 @@ print("anything_you_want:", project.anything_you_want)
 
 #### The HyppopySolver classes
 
-Each solver is a child of the HyppopySolver class. This is only interesting if you're planning to write a new solver, we will discuss this in the section Solver Development. All solvers we can use to optimize our blackbox function are part of the module 'hyppopy.solver'. Below is a list of all solvers available along with their access key in squared brackets.
+Each solver is a child of the HyppopySolver class. This is only interesting if you're planning to write a new solver, we will discuss this in the section 'Solver Development'. All solvers we can use to optimize our blackbox function are part of the module 'hyppopy.solver'. Below is a list of all available solvers along with their access key in squared brackets.
 
 * HyperoptSolver [hyperopt]
     _Bayes Optimization use Tree-Parzen Estimator, supports uniform, normal, loguniform and categorical parameter_
@@ -171,10 +171,10 @@ print("*"*100)
 The SolverPool is a class keeping track of all solver classes. We have several options to ask the SolverPool for the desired solver. We can add a setting called solver to our config or to the project instance respectively, or we can use the solver access key (see solver listing above) to ask for the solver directly.
 
 ```python
-# import the SolverPool class
+# Import the SolverPool class.
 from hyppopy.SolverPool import SolverPool
 
-# Import the HyppopyProject class
+# Import the HyppopyProject class.
 from hyppopy.HyppopyProject import HyppopyProject
 
 # Our function to optimize
@@ -194,7 +194,7 @@ solver = SolverPool.get(project=project)
 # Another option without the usage of the solver field would be:
 # solver = SolverPool.get(solver_name='hyperopt', project=project)
 
-# pass the loss function to the solver
+# Pass the loss function to the solver.
 solver.blackbox = my_loss_func
 # run the solver
 solver.run()
@@ -208,15 +208,15 @@ print("*"*100)
 ```
 
 #### The BlackboxFunction class
-To extend the possibilities beyond using parameter only loss functions as in the examples above, we can use the BlackboxFunction class. This class is a wrapper class around the actual loss_function providing a more advanced access interface to data handling and a callback_function for accessing the solvers iteration loop.
+To extend the possibilities beyond using parameter-only loss functions as in the examples above, we can use the BlackboxFunction class. This class is a wrapper class around the actual loss_function providing a more advanced access interface to data handling and a callback_function for accessing the solvers iteration loop.
 ```python
-# import the HyppopyProject class keeping track of inputs
+# Import the HyppopyProject class keeping track of inputs.
 from hyppopy.HyppopyProject import HyppopyProject
 
-# import the SolverPool singleton class
+# Import the SolverPool singleton class.
 from hyppopy.SolverPool import SolverPool
 
-# import the Blackboxfunction class wrapping your problem for Hyppopy
+# Import the Blackboxfunction class wrapping your problem for Hyppopy.
 from hyppopy.BlackboxFunction import BlackboxFunction
 
 # Create the HyppopyProject class instance
@@ -227,7 +227,6 @@ project.add_hyperparameter(name="kernel", domain="categorical", data=["linear", 
 project.add_setting(name="max_iterations", value=500)
 project.add_setting(name="solver", value="optunity")
 
-
 # The BlackboxFunction signature is as follows:
 # BlackboxFunction(blackbox_func=None,
 #                  dataloader_func=None,
@@ -236,25 +235,24 @@ project.add_setting(name="solver", value="optunity")
 #                  data=None,
 #                  **kwargs)
 #
-# - blackbox_func: a function pointer to the users loss function
+# - blackbox_func: a function pointer to the user's loss function
 # - dataloader_func: a function pointer for handling dataloading. The function is called once before
-#                    optimizing. What it returns is passed as first argument to your loss functions
+#                    optimizing. What it returns is passed as first argument to your loss function's
 #                    data argument.
 # - preprocess_func: a function pointer for data preprocessing. The function is called once before
 #                    optimizing and gets via kwargs['data'] the raw data object set directly or returned
 #                    from dataloader_func. What this function returns is then what is passed as first
 #                    argument to your loss function.
 # - callback_func: a function pointer called after each iteration. The input kwargs is a dictionary
-#                  keeping the parameters used in this iteration, the 'iteration' index, the 'loss'
-#                  and the 'status'. The function in this example is used for realtime printing it's
+#                  keeping the parameters used in this iteration, the 'iteration' index, the 'loss',
+#                  and the 'status'. The function in this example is used for realtime printing its
 #                  input but can also be used for realtime visualization.
 # - data: if not done via dataloader_func one can set a raw_data object directly
-# - kwargs: dict that whose content is passed to all functions above.
+# - kwargs: dictionary whose content is passed to all functions above.
 
 from sklearn.svm import SVC
 from sklearn.datasets import load_iris
 from sklearn.model_selection import cross_val_score
-
 
 def my_dataloader_function(**kwargs):
     print("Dataloading...")
@@ -263,7 +261,6 @@ def my_dataloader_function(**kwargs):
     print("my loading argument: {}".format(kwargs['params']['my_dataloader_input']))
     iris_data = load_iris()
     return [iris_data.data, iris_data.target]
-
 
 def my_preprocess_function(**kwargs):
     print("Preprocessing...")
@@ -280,15 +277,12 @@ def my_preprocess_function(**kwargs):
         x[i, :] += kwargs['params']['my_preproc_param']
     return [x, y]
 
-
 def my_callback_function(**kwargs):
     print("\r{}".format(kwargs), end="")
-
 
 def my_loss_function(data, params):
     clf = SVC(**params)
     return -cross_val_score(estimator=clf, X=data[0], y=data[1], cv=3).mean()
-
 
 # We now create the BlackboxFunction object and pass all function pointers defined above,
 # as well as 2 dummy parameter (my_preproc_param, my_dataloader_input) for demonstration purposes.
@@ -300,13 +294,13 @@ blackbox = BlackboxFunction(blackbox_func=my_loss_function,
                             my_dataloader_input='could/be/a/path')
 
 
-# Get the solver
+# Get the solver.
 solver = SolverPool.get(project=project)
-# Give the solver your blackbox
+# Give the solver your blackbox.
 solver.blackbox = blackbox
 # Run the solver
 solver.run()
-# Get your results
+# Get your results.
 df, best = solver.get_results()
 
 print("\n")
